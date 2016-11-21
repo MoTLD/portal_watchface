@@ -1,0 +1,266 @@
+{
+    "author": "Noiob",
+    "dependencies": {},
+    "keywords": [],
+    "name": "portal-sign",
+    "pebble": {
+        "capabilities": [
+            "health"
+        ],
+        "displayName": "Portal Sign +\ud83d\udc9f",
+        "enableMultiJS": false,
+        "messageKeys": [],
+        "projectType": "native",
+        "resources": {
+            "media": [
+                {
+                    "file": "images/title_image.png",
+                    "menuIcon": true,
+                    "name": "IMAGE_TITLE",
+                    "targetPlatforms": null,
+                    "type": "png"
+                },
+                {
+                    "file": "images/t9.png",
+                    "name": "IMAGE_TILE_9",
+                    "type": "png"
+                },
+                {
+                    "file": "images/t8.png",
+                    "name": "IMAGE_TILE_8",
+                    "type": "png"
+                },
+                {
+                    "file": "images/t7.png",
+                    "name": "IMAGE_TILE_7",
+                    "type": "png"
+                },
+                {
+                    "file": "images/t6.png",
+                    "name": "IMAGE_TILE_6",
+                    "type": "png"
+                },
+                {
+                    "file": "images/t5.png",
+                    "name": "IMAGE_TILE_5",
+                    "type": "png"
+                },
+                {
+                    "file": "images/t4.png",
+                    "name": "IMAGE_TILE_4",
+                    "type": "png"
+                },
+                {
+                    "file": "images/t3.png",
+                    "name": "IMAGE_TILE_3",
+                    "type": "png"
+                },
+                {
+                    "file": "images/t2.png",
+                    "name": "IMAGE_TILE_2",
+                    "type": "png"
+                },
+                {
+                    "file": "images/t19.png",
+                    "name": "IMAGE_TILE_19",
+                    "type": "png"
+                },
+                {
+                    "file": "images/t18.png",
+                    "name": "IMAGE_TILE_18",
+                    "type": "png"
+                },
+                {
+                    "file": "images/t17.png",
+                    "name": "IMAGE_TILE_17",
+                    "type": "png"
+                },
+                {
+                    "file": "images/t16.png",
+                    "name": "IMAGE_TILE_16",
+                    "type": "png"
+                },
+                {
+                    "file": "images/t15.png",
+                    "name": "IMAGE_TILE_15",
+                    "type": "png"
+                },
+                {
+                    "file": "images/t14.png",
+                    "name": "IMAGE_TILE_14",
+                    "type": "png"
+                },
+                {
+                    "file": "images/t13.png",
+                    "name": "IMAGE_TILE_13",
+                    "type": "png"
+                },
+                {
+                    "file": "images/t12.png",
+                    "name": "IMAGE_TILE_12",
+                    "type": "png"
+                },
+                {
+                    "file": "images/t11.png",
+                    "name": "IMAGE_TILE_11",
+                    "type": "png"
+                },
+                {
+                    "file": "images/t10.png",
+                    "name": "IMAGE_TILE_10",
+                    "type": "png"
+                },
+                {
+                    "file": "images/t1.png",
+                    "name": "IMAGE_TILE_1",
+                    "type": "png"
+                },
+                {
+                    "file": "images/t0.png",
+                    "name": "IMAGE_TILE_0",
+                    "type": "png"
+                },
+                {
+                    "file": "images/partal_mockup.png",
+                    "name": "IMAGE_BACKGROUND",
+                    "type": "png"
+                },
+                {
+                    "file": "images/hide_seconds.png",
+                    "name": "IMAGE_HIDE_HEALTH",
+                    "targetPlatforms": null,
+                    "type": "png"
+                },
+                {
+                    "file": "images/disconnected.png",
+                    "name": "IMAGE_STATUS_DISCONNECTED",
+                    "type": "png"
+                },
+                {
+                    "file": "images/charging.png",
+                    "name": "IMAGE_STATUS_CHARGING",
+                    "type": "png"
+                },
+                {
+                    "file": "images/9s.png",
+                    "name": "IMAGE_MIN_9",
+                    "type": "png"
+                },
+                {
+                    "file": "images/9.png",
+                    "name": "IMAGE_NUM_9",
+                    "type": "png"
+                },
+                {
+                    "file": "images/8s.png",
+                    "name": "IMAGE_MIN_8",
+                    "type": "png"
+                },
+                {
+                    "file": "images/8.png",
+                    "name": "IMAGE_NUM_8",
+                    "type": "png"
+                },
+                {
+                    "file": "images/7s.png",
+                    "name": "IMAGE_MIN_7",
+                    "type": "png"
+                },
+                {
+                    "file": "images/7.png",
+                    "name": "IMAGE_NUM_7",
+                    "type": "png"
+                },
+                {
+                    "file": "images/6s.png",
+                    "name": "IMAGE_MIN_6",
+                    "type": "png"
+                },
+                {
+                    "file": "images/6.png",
+                    "name": "IMAGE_NUM_6",
+                    "type": "png"
+                },
+                {
+                    "file": "images/5s.png",
+                    "name": "IMAGE_MIN_5",
+                    "type": "png"
+                },
+                {
+                    "file": "images/5.png",
+                    "name": "IMAGE_NUM_5",
+                    "type": "png"
+                },
+                {
+                    "file": "images/4s.png",
+                    "name": "IMAGE_MIN_4",
+                    "type": "png"
+                },
+                {
+                    "file": "images/4.png",
+                    "name": "IMAGE_NUM_4",
+                    "type": "png"
+                },
+                {
+                    "file": "images/3s.png",
+                    "name": "IMAGE_MIN_3",
+                    "type": "png"
+                },
+                {
+                    "file": "images/3.png",
+                    "name": "IMAGE_NUM_3",
+                    "type": "png"
+                },
+                {
+                    "file": "images/2s.png",
+                    "name": "IMAGE_MIN_2",
+                    "type": "png"
+                },
+                {
+                    "file": "images/2.png",
+                    "name": "IMAGE_NUM_2",
+                    "type": "png"
+                },
+                {
+                    "file": "images/1s.png",
+                    "name": "IMAGE_MIN_1",
+                    "type": "png"
+                },
+                {
+                    "file": "images/1.png",
+                    "name": "IMAGE_NUM_1",
+                    "type": "png"
+                },
+                {
+                    "file": "images/0s.png",
+                    "name": "IMAGE_MIN_0",
+                    "type": "png"
+                },
+                {
+                    "file": "images/0.png",
+                    "name": "IMAGE_NUM_0",
+                    "type": "png"
+                },
+                {
+                    "characterRegex": "[a-z0-9/\\s]",
+                    "file": "fonts/tahoma.ttf",
+                    "name": "FONT_THOMA_9",
+                    "targetPlatforms": null,
+                    "trackingAdjust": 1,
+                    "type": "font"
+                }
+            ]
+        },
+        "sdkVersion": "3",
+        "targetPlatforms": [
+            "aplite",
+            "basalt",
+            "diorite"
+        ],
+        "uuid": "14163fb3-75d1-44f2-8763-6995581c5e9c",
+        "watchapp": {
+            "watchface": true
+        }
+    },
+    "version": "1.2.0"
+}

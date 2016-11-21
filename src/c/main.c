@@ -5,11 +5,11 @@ Window *s_main_window;
 static BitmapLayer *s_background_layer;
 static GBitmap *s_background_bitmap;
 
-static BitmapLayer *s_battery_layer;
-static GBitmap *s_battery_bitmap;
+static BitmapLayer *s_health_layer;
+static GBitmap *s_health_bitmap;
 
 static TextLayer *s_date_layer;
-static GFont *s_date_font;
+static GFont s_date_font;
 
 static bool s_charging;
 static bool s_disconnected;
@@ -64,19 +64,34 @@ static void load_status_image_into_slot(bool bluetooth);
 static void unload_tile_image_from_slot(int slot_number);
 static void load_tile_image_into_slot(int slot_number, int tile_number);
 
-static void handle_battery(BatteryChargeState charge_state) {
-  if(!charge_state.is_plugged){
-    s_charging = false;
-    unload_tile_image_from_slot(0);
-    load_tile_image_into_slot(0, s_random_array[0]);
+static void handle_health(HealthEventType event, void *context) {
+  if (event == HealthEventMovementUpdate) {
+    HealthMetric metric = HealthMetricStepCount;
+    const HealthServiceTimeScope scope = HealthServiceTimeScopeDaily;
+    
+    time_t start = time_start_of_today();
+    time_t end = start + SECONDS_PER_DAY;
+
+    // Check the metric has data available for today
+    HealthServiceAccessibilityMask mask1 = health_service_metric_accessible(metric, 
+                                                                           start, end);
+    // Check that an averaged value is accessible
+    HealthServiceAccessibilityMask mask2 = 
+      health_service_metric_averaged_accessible(metric, start, end, scope);
+    
+    if((mask1 & HealthServiceAccessibilityMaskAvailable) && (mask2 & HealthServiceAccessibilityMaskAvailable)) {
+      int steps = (int)health_service_sum_today(metric);
+      int average = (int)health_service_sum_averaged(metric, start, end, scope);
+      printf("steps: %d, average: %d",steps,average);
+      
+      
+      int percent = 100;
+      if (steps <= average) {
+        percent = steps*100/average;
+      }
+      layer_set_frame(bitmap_layer_get_layer(s_health_layer), GRect((percent * 1.2) + 22, 97, 119, 16));
+    }
   }
-  else{
-    s_charging = true;
-    load_status_image_into_slot(false);
-  }
-  
-  int percent = charge_state.charge_percent;
-  layer_set_frame(bitmap_layer_get_layer(s_battery_layer), GRect((percent * 1.2) + 22, 97, 119, 16));
 }
 
 static void bluetooth_connection_callback(bool connected) {
@@ -117,11 +132,7 @@ static void load_digit_image_into_slot(int slot_number, int digit_value) {
     s_images[slot_number] = gbitmap_create_with_resource(IMAGE_RESOURCE_IDS_MIN[digit_value]);
   }
   
-  #ifdef PBL_PLATFORM_BASALT
-    GRect bounds = gbitmap_get_bounds(s_images[slot_number]);
-  #else
-    GRect bounds = s_images[slot_number]->bounds;
-  #endif
+  GRect bounds = gbitmap_get_bounds(s_images[slot_number]);
   
   BitmapLayer *bitmap_layer;    
   if(slot_number < 2){
@@ -154,11 +165,7 @@ static void load_tile_image_into_slot(int slot_number, int tile_number) {
   
   s_tiles[slot_number] = gbitmap_create_with_resource(IMAGE_RESOURCE_IDS_TILE[tile_number]);
   
-  #ifdef PBL_PLATFORM_BASALT
-    GRect bounds = gbitmap_get_bounds(s_tiles[slot_number]);
-  #else
-    GRect bounds = s_tiles[slot_number]->bounds;
-  #endif
+  GRect bounds = gbitmap_get_bounds(s_tiles[slot_number]);
   
   BitmapLayer *bitmap_layer;    
   
@@ -205,11 +212,7 @@ static void load_status_image_into_slot(bool bluetooth){
     
   s_tile_slot_state[slot_number] = bluetooth + 100;
   
-  #ifdef PBL_PLATFORM_BASALT
-    GRect bounds = gbitmap_get_bounds(s_tiles[slot_number]);
-  #else
-    GRect bounds = s_tiles[slot_number]->bounds;
-  #endif
+  GRect bounds = gbitmap_get_bounds(s_tiles[slot_number]);
   
   BitmapLayer *bitmap_layer;    
   
@@ -288,10 +291,10 @@ static void main_window_load(Window *window) {
   bitmap_layer_set_bitmap(s_background_layer, s_background_bitmap);
   layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_background_layer));
   
-  s_battery_bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_HIDE_BATTERY);
-  s_battery_layer = bitmap_layer_create(GRect(22, 97, 119, 16));
-  bitmap_layer_set_bitmap(s_battery_layer, s_battery_bitmap);
-  layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_battery_layer));
+  s_health_bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_HIDE_HEALTH);
+  s_health_layer = bitmap_layer_create(GRect(22, 97, 119, 16));
+  bitmap_layer_set_bitmap(s_health_layer, s_health_bitmap);
+  layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_health_layer));
   
   s_date_layer = text_layer_create(GRect(28, 84, 30, 10));
   text_layer_set_text_color(s_date_layer, GColorBlack);
@@ -312,7 +315,7 @@ static void main_window_load(Window *window) {
   update_time(tick_time);
   update_tiles();
   
-  handle_battery(battery_state_service_peek());
+  handle_health(HealthEventMovementUpdate, NULL);
   
   if(bluetooth_connection_service_peek()){
     s_disconnected = false;
@@ -326,7 +329,7 @@ static void main_window_load(Window *window) {
   
   tick_timer_service_subscribe(MINUTE_UNIT, handle_minute_tick);
   bluetooth_connection_service_subscribe(bluetooth_connection_callback);
-  battery_state_service_subscribe(handle_battery);
+  health_service_events_subscribe(handle_health, NULL);
 }
 
 static void main_window_unload(Window *window){
@@ -338,10 +341,10 @@ static void main_window_unload(Window *window){
   for(int i = 0; i < TOTAL_TILE_SLOTS; i++){
     unload_tile_image_from_slot(i);
   }
-  gbitmap_destroy(s_battery_bitmap);
-  bitmap_layer_destroy(s_battery_layer);
+  gbitmap_destroy(s_health_bitmap);
+  bitmap_layer_destroy(s_health_layer);
   text_layer_destroy(s_date_layer);
-  battery_state_service_unsubscribe();
+  health_service_events_unsubscribe();
   bluetooth_connection_service_unsubscribe();
 }
 
