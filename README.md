@@ -22,4 +22,4 @@ It displays time, date and the Step Goal progress as the progress graph. The fac
 
 - no fall damage
 
-[![Portal Sign +💟 | Watchface](http://pblweb.com/badge/5832c17200355a8634000185/black/small)](https://apps.getpebble.com/en_US/application/5832c17200355a8634000185)
+[Portal Sign +💟 | Pebble App Store](https://apps.getpebble.com/en_US/application/5832c17200355a8634000185)
