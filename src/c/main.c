@@ -5,8 +5,11 @@ Window *s_main_window;
 static BitmapLayer *s_background_layer;
 static GBitmap *s_background_bitmap;
 
-static BitmapLayer *s_health_layer;
-static GBitmap *s_health_bitmap;
+static BitmapLayer *s_steps_layer;
+static GBitmap *s_steps_bitmap;
+
+static BitmapLayer *s_hr_layer;
+static GBitmap *s_hr_bitmap;
 
 static BitmapLayer *s_battery_layer;
 static GBitmap *s_battery_bitmap;
@@ -67,30 +70,45 @@ static void load_status_image_into_slot(bool bluetooth);
 static void unload_tile_image_from_slot(int slot_number);
 static void load_tile_image_into_slot(int slot_number, int tile_number);
 
-static void handle_health(HealthEventType event, void *context) {
-  if (event == HealthEventMovementUpdate) {
-    HealthMetric metric = HealthMetricStepCount;
-    const HealthServiceTimeScope scope = HealthServiceTimeScopeDaily;
-    
-    time_t start = time_start_of_today();
-    time_t end = start + SECONDS_PER_DAY;
+static void handle_health(HealthEventType event, void *context){
+        if (event == HealthEventMovementUpdate || event == HealthEventSignificantUpdate) {
+            HealthMetric metric = HealthMetricStepCount;
+            const HealthServiceTimeScope scope = HealthServiceTimeScopeDaily;
 
-    // Check the metric has data available for today
-    HealthServiceAccessibilityMask mask1 = health_service_metric_accessible(metric, 
+            time_t start = time_start_of_today();
+            time_t end = start + SECONDS_PER_DAY;
+
+            // Check the metric has data available for today
+            HealthServiceAccessibilityMask mask1 = health_service_metric_accessible(metric, 
                                                                            start, end);
-    if(mask1 & HealthServiceAccessibilityMaskAvailable) {
-      int steps = (int)health_service_sum_today(metric);
-      printf("steps: %d",steps);
+            if(mask1 & HealthServiceAccessibilityMaskAvailable) {
+              int steps = (int)health_service_sum_today(metric);
+              printf("steps: %d",steps);
       
       
-      int percent = 100;
-      if (steps <= 10000) {
-        percent = steps*100/10000;
-      }
-      layer_set_frame(bitmap_layer_get_layer(s_health_layer), GRect((percent * 1.2) + 22, 97, 119, 16));
-    }
-  }
+              int percent = 100;
+              if (steps <= 10000) {
+                percent = steps*100/10000;
+              }
+              layer_set_frame(bitmap_layer_get_layer(s_steps_layer), GRect((percent * 1.2) + 22, 97, 119, 8));
+            }
+        }
+
+        if (event == HealthEventHeartRateUpdate || event == HealthEventSignificantUpdate) {
+            HealthServiceAccessibilityMask hr = health_service_metric_accessible(HealthMetricHeartRateBPM, time(NULL), time(NULL));
+            if (hr & HealthServiceAccessibilityMaskAvailable) {
+              int bpm = (int)health_service_peek_current_value(HealthMetricHeartRateBPM);
+              int percent = 100;
+              if (bpm <= 200) {
+                percent = bpm*100/200;
+              }
+              layer_set_frame(bitmap_layer_get_layer(s_hr_layer), GRect((percent * 1.2) + 22, 105, 119, 8));
+            }
+	}
+
+
 }
+
 
 static void handle_battery(BatteryChargeState charge_state) {
   if(!charge_state.is_plugged){
@@ -305,10 +323,15 @@ static void main_window_load(Window *window) {
   bitmap_layer_set_bitmap(s_background_layer, s_background_bitmap);
   layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_background_layer));
   
-  s_health_bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_HIDE_HEALTH);
-  s_health_layer = bitmap_layer_create(GRect(22, 97, 119, 16));
-  bitmap_layer_set_bitmap(s_health_layer, s_health_bitmap);
-  layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_health_layer));
+  s_steps_bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_HIDE_HEALTH);
+  s_steps_layer = bitmap_layer_create(GRect(22, 97, 119, 8));
+  bitmap_layer_set_bitmap(s_steps_layer, s_steps_bitmap);
+  layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_steps_layer));
+  
+  s_hr_bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_HIDE_HEALTH);
+  s_hr_layer = bitmap_layer_create(GRect(22, 105, 119, 8));
+  bitmap_layer_set_bitmap(s_hr_layer, s_hr_bitmap);
+  layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_hr_layer));
   
   s_battery_bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_HIDE_BATTERY);
   s_battery_layer = bitmap_layer_create(GRect(22, 114, 119, 5));
@@ -335,6 +358,7 @@ static void main_window_load(Window *window) {
   update_tiles();
   
   handle_health(HealthEventMovementUpdate, NULL);
+  handle_health(HealthEventHeartRateUpdate, NULL);
   handle_battery(battery_state_service_peek());
   
 /*  if(bluetooth_connection_service_peek()){
@@ -362,8 +386,10 @@ static void main_window_unload(Window *window){
   for(int i = 0; i < TOTAL_TILE_SLOTS; i++){
     unload_tile_image_from_slot(i);
   }
-  gbitmap_destroy(s_health_bitmap);
-  bitmap_layer_destroy(s_health_layer);
+  gbitmap_destroy(s_steps_bitmap);
+  bitmap_layer_destroy(s_steps_layer);
+  gbitmap_destroy(s_hr_bitmap);
+  bitmap_layer_destroy(s_hr_layer);
   gbitmap_destroy(s_battery_bitmap);
   bitmap_layer_destroy(s_battery_layer);
   text_layer_destroy(s_date_layer);
