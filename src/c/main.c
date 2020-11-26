@@ -90,7 +90,7 @@ static void handle_health(HealthEventType event, void *context){
               if (steps <= 10000) {
                 percent = steps*100/10000;
               }
-              layer_set_frame(bitmap_layer_get_layer(s_steps_layer), GRect((percent * 1.2) + 22, 97, 119, 8));
+              layer_set_frame(bitmap_layer_get_layer(s_steps_layer), GRect(((percent * 1.2)/3)*3 + 22, 98, 119, 4));
             }
         }
 
@@ -99,10 +99,11 @@ static void handle_health(HealthEventType event, void *context){
             if (hr & HealthServiceAccessibilityMaskAvailable) {
               int bpm = (int)health_service_peek_current_value(HealthMetricHeartRateBPM);
               int percent = 100;
-              if (bpm <= 200) {
-                percent = bpm*100/200;
+              //Make BPM range 50-150
+              if (bpm <= 150) {
+                percent = bpm-50;
               }
-              layer_set_frame(bitmap_layer_get_layer(s_hr_layer), GRect((percent * 1.2) + 22, 105, 119, 8));
+              layer_set_frame(bitmap_layer_get_layer(s_hr_layer), GRect(((percent * 1.2)/3)*3 + 22, 102, 119, 4));
             }
 	}
 
@@ -122,7 +123,7 @@ static void handle_battery(BatteryChargeState charge_state) {
   }
   
   int percent = charge_state.charge_percent;
-  layer_set_frame(bitmap_layer_get_layer(s_battery_layer), GRect((percent * 1.2) + 22, 114, 119, 5));
+  layer_set_frame(bitmap_layer_get_layer(s_battery_layer), GRect((percent * 1.2) + 22, 118, 119, 1));
 }
 
 
@@ -324,17 +325,17 @@ static void main_window_load(Window *window) {
   layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_background_layer));
   
   s_steps_bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_HIDE_HEALTH);
-  s_steps_layer = bitmap_layer_create(GRect(22, 97, 119, 8));
+  s_steps_layer = bitmap_layer_create(GRect(22, 98, 119, 4));
   bitmap_layer_set_bitmap(s_steps_layer, s_steps_bitmap);
   layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_steps_layer));
   
   s_hr_bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_HIDE_HEALTH);
-  s_hr_layer = bitmap_layer_create(GRect(22, 105, 119, 8));
+  s_hr_layer = bitmap_layer_create(GRect(22, 102, 119, 4));
   bitmap_layer_set_bitmap(s_hr_layer, s_hr_bitmap);
   layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_hr_layer));
   
   s_battery_bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_HIDE_BATTERY);
-  s_battery_layer = bitmap_layer_create(GRect(22, 114, 119, 5));
+  s_battery_layer = bitmap_layer_create(GRect(22, 118, 119, 1));
   bitmap_layer_set_bitmap(s_battery_layer, s_battery_bitmap);
   layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_battery_layer));
   
