@@ -126,9 +126,14 @@
                     "type": "png"
                 },
                 {
-                    "file": "images/hide_seconds.png",
+                    "file": "images/hide_health.png",
                     "name": "IMAGE_HIDE_HEALTH",
                     "targetPlatforms": null,
+                    "type": "png"
+                },
+                {
+                    "file": "images/hide_battery.png",
+                    "name": "IMAGE_HIDE_BATTERY",
                     "type": "png"
                 },
                 {

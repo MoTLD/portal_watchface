@@ -8,11 +8,14 @@ static GBitmap *s_background_bitmap;
 static BitmapLayer *s_health_layer;
 static GBitmap *s_health_bitmap;
 
+static BitmapLayer *s_battery_layer;
+static GBitmap *s_battery_bitmap;
+
 static TextLayer *s_date_layer;
 static GFont s_date_font;
 
 static bool s_charging;
-static bool s_disconnected;
+//static bool s_disconnected;
 
 #define TOTAL_IMAGE_SLOTS 4
 #define NUMBER_OF_IMAGES 10
@@ -75,36 +78,47 @@ static void handle_health(HealthEventType event, void *context) {
     // Check the metric has data available for today
     HealthServiceAccessibilityMask mask1 = health_service_metric_accessible(metric, 
                                                                            start, end);
-    // Check that an averaged value is accessible
-    HealthServiceAccessibilityMask mask2 = 
-      health_service_metric_averaged_accessible(metric, start, end, scope);
-    
-    if((mask1 & HealthServiceAccessibilityMaskAvailable) && (mask2 & HealthServiceAccessibilityMaskAvailable)) {
+    if(mask1 & HealthServiceAccessibilityMaskAvailable) {
       int steps = (int)health_service_sum_today(metric);
-      int average = (int)health_service_sum_averaged(metric, start, end, scope);
-      printf("steps: %d, average: %d",steps,average);
+      printf("steps: %d",steps);
       
       
       int percent = 100;
-      if (steps <= average) {
-        percent = steps*100/average;
+      if (steps <= 10000) {
+        percent = steps*100/10000;
       }
       layer_set_frame(bitmap_layer_get_layer(s_health_layer), GRect((percent * 1.2) + 22, 97, 119, 16));
     }
   }
 }
 
+static void handle_battery(BatteryChargeState charge_state) {
+  if(!charge_state.is_plugged){
+    s_charging = false;
+    unload_tile_image_from_slot(0);
+    load_tile_image_into_slot(0, s_random_array[0]);
+  }
+  else{
+    s_charging = true;
+    load_status_image_into_slot(false);
+  }
+  
+  int percent = charge_state.charge_percent;
+  layer_set_frame(bitmap_layer_get_layer(s_battery_layer), GRect((percent * 1.2) + 22, 114, 119, 5));
+}
+
+
 static void bluetooth_connection_callback(bool connected) {
   if(connected){
     vibes_long_pulse();
-    s_disconnected = false;
-    unload_tile_image_from_slot(2);
-    load_tile_image_into_slot(2, s_random_array[2]);
+//    s_disconnected = false;
+//    unload_tile_image_from_slot(2);
+//    load_tile_image_into_slot(2, s_random_array[2]);
   }
   else{
     vibes_double_pulse();
-    s_disconnected = true;
-    load_status_image_into_slot(true);
+//    s_disconnected = true;
+//    load_status_image_into_slot(true);
   }
 }
 
@@ -251,9 +265,9 @@ static void update_tiles(){
     if(i == 0 && s_charging){
       continue;
     }
-    else if(i == 2 && s_disconnected){
-      continue;
-    }
+//    else if(i == 2 && s_disconnected){
+//      continue;
+//    }
     int j = i + rand() % (NUMBER_OF_TILES - i);
     int temp = s_random_array[i];
     s_random_array[i] = s_random_array[j];
@@ -265,7 +279,7 @@ static void update_tiles(){
 
 static void update_date(struct tm *tick_time){
   static char date_text[] = "01/01";
-  strftime(date_text, sizeof(date_text), "%d/%m", tick_time);
+  strftime(date_text, sizeof(date_text), "%m/%d", tick_time);
   text_layer_set_text(s_date_layer, date_text);
 }
 
@@ -296,6 +310,11 @@ static void main_window_load(Window *window) {
   bitmap_layer_set_bitmap(s_health_layer, s_health_bitmap);
   layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_health_layer));
   
+  s_battery_bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_HIDE_BATTERY);
+  s_battery_layer = bitmap_layer_create(GRect(22, 114, 119, 5));
+  bitmap_layer_set_bitmap(s_battery_layer, s_battery_bitmap);
+  layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_battery_layer));
+  
   s_date_layer = text_layer_create(GRect(28, 84, 30, 10));
   text_layer_set_text_color(s_date_layer, GColorBlack);
   text_layer_set_background_color(s_date_layer, GColorClear);
@@ -316,8 +335,9 @@ static void main_window_load(Window *window) {
   update_tiles();
   
   handle_health(HealthEventMovementUpdate, NULL);
+  handle_battery(battery_state_service_peek());
   
-  if(bluetooth_connection_service_peek()){
+/*  if(bluetooth_connection_service_peek()){
     s_disconnected = false;
     update_tiles();
   }
@@ -325,11 +345,12 @@ static void main_window_load(Window *window) {
     s_disconnected = true;
     load_status_image_into_slot(true);
   }
-  
+*/
   
   tick_timer_service_subscribe(MINUTE_UNIT, handle_minute_tick);
   bluetooth_connection_service_subscribe(bluetooth_connection_callback);
   health_service_events_subscribe(handle_health, NULL);
+  battery_state_service_subscribe(handle_battery);  
 }
 
 static void main_window_unload(Window *window){
@@ -343,8 +364,11 @@ static void main_window_unload(Window *window){
   }
   gbitmap_destroy(s_health_bitmap);
   bitmap_layer_destroy(s_health_layer);
+  gbitmap_destroy(s_battery_bitmap);
+  bitmap_layer_destroy(s_battery_layer);
   text_layer_destroy(s_date_layer);
   health_service_events_unsubscribe();
+  battery_state_service_unsubscribe();
   bluetooth_connection_service_unsubscribe();
 }
 
