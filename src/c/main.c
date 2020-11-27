@@ -90,7 +90,7 @@ static void handle_health(HealthEventType event, void *context){
               if (steps <= 10000) {
                 percent = steps*100/10000;
               }
-              layer_set_frame(bitmap_layer_get_layer(s_steps_layer), GRect(((percent * 1.2)/3)*3 + 22, 98, 119, 4));
+              layer_set_frame(bitmap_layer_get_layer(s_steps_layer), GRect((int)((percent * 1.2)/3)*3 + 22, 98, 119, 4));
             }
         }
 
@@ -103,7 +103,7 @@ static void handle_health(HealthEventType event, void *context){
               if (bpm <= 150) {
                 percent = bpm-50;
               }
-              layer_set_frame(bitmap_layer_get_layer(s_hr_layer), GRect(((percent * 1.2)/3)*3 + 22, 102, 119, 4));
+              layer_set_frame(bitmap_layer_get_layer(s_hr_layer), GRect((int)((percent * 1.2)/3)*3 + 22, 102, 119, 4));
             }
 	}
 
