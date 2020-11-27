@@ -101,7 +101,12 @@ static void handle_health(HealthEventType event, void *context){
               int percent = 100;
               //Make BPM range 50-150
               if (bpm <= 150) {
-                percent = bpm-50;
+                if (bpm >= 50) {
+                  percent = bpm-50;
+                }
+                else {
+                  percent = 0;
+                }
               }
               layer_set_frame(bitmap_layer_get_layer(s_hr_layer), GRect((int)((percent * 1.2)/3)*3 + 22, 102, 119, 4));
             }
