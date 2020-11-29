@@ -90,7 +90,7 @@ static void handle_health(HealthEventType event, void *context){
               if (steps <= 10000) {
                 percent = steps*100/10000;
               }
-              layer_set_frame(bitmap_layer_get_layer(s_steps_layer), GRect((int)((percent * 1.2)/3)*3 + 22, 98, 119, 4));
+              layer_set_frame(bitmap_layer_get_layer(s_steps_layer), GRect((int)((percent * 1.2)/3)*3 + 22, 99, 119, 7));
             }
         }
 
@@ -108,7 +108,7 @@ static void handle_health(HealthEventType event, void *context){
                   percent = 0;
                 }
               }
-              layer_set_frame(bitmap_layer_get_layer(s_hr_layer), GRect((int)((percent * 1.2)/3)*3 + 22, 102, 119, 4));
+              layer_set_frame(bitmap_layer_get_layer(s_hr_layer), GRect((int)((percent * 1.2)/3)*3 + 22, 96, 119, 1));
             }
 	}
 
@@ -330,12 +330,12 @@ static void main_window_load(Window *window) {
   layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_background_layer));
   
   s_steps_bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_HIDE_HEALTH);
-  s_steps_layer = bitmap_layer_create(GRect(22, 98, 119, 4));
+  s_steps_layer = bitmap_layer_create(GRect(22, 99, 119, 7));
   bitmap_layer_set_bitmap(s_steps_layer, s_steps_bitmap);
   layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_steps_layer));
   
-  s_hr_bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_HIDE_HEALTH);
-  s_hr_layer = bitmap_layer_create(GRect(22, 102, 119, 4));
+  s_hr_bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_HIDE_BATTERY);
+  s_hr_layer = bitmap_layer_create(GRect(22, 96, 119, 1));
   bitmap_layer_set_bitmap(s_hr_layer, s_hr_bitmap);
   layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_hr_layer));
   
